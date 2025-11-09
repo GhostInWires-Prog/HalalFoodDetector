@@ -1,0 +1,17 @@
+{
+    "venvPath": "backend",
+    "venv": ".venv",
+    "reportMissingImports": "warning",
+    "executionEnvironments": [
+        {
+            "root": "backend/src",
+            "extraPaths": [
+                "backend/src"
+            ]
+        }
+    ],
+    "exclude": [
+        "**/__pycache__"
+    ]
+}
+

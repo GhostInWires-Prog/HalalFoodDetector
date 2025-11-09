@@ -1,0 +1,91 @@
+# General
+.DS_Store
+Thumbs.db
+
+# Node / React Native
+app/node_modules/
+app/bun.lockb
+.expo/
+.expo-shared/
+app/android/.gradle/
+app/android/build/
+app/android/app/build/
+app/.env.local
+
+# Expo cache artifacts
+app/.expo/
+app/.expo-shared/
+app/ios/
+app/ios-build/
+app/.parcel-cache/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Metro / React Native cache
+app/.metro-cache/
+app/.packager/
+
+# Fastlane / builds
+app/fastlane/report.xml
+app/fastlane/Preview.html
+app/fastlane/screenshots/
+
+# Coverage / Jest
+coverage/
+app/coverage/
+
+# Backend Python
+backend/.venv/
+backend/__pycache__/
+backend/**/*.pyc
+backend/.mypy_cache/
+backend/.pytest_cache/
+backend/.ruff_cache/
+
+# Environment / secrets
+.env
+.env.*
+backend/.env
+app/.env
+
+# ML artifacts
+backend/src/models/*.h5
+backend/src/models/*.keras
+backend/src/models/*.tflite
+backend/src/models/*.joblib
+ml/experiments/
+ml/models/
+ml/reports/
+
+# IDE settings
+.vscode/
+.idea/
+*.swp
+
+# Node/Expo
+app/node_modules/
+app/.expo/
+app/.expo-shared/
+app/dist/
+
+# Python
+backend/.venv/
+__pycache__/
+*.pyc
+
+# ML Artifacts
+ml/datasets/
+ml/models/
+ml/experiments/run_*/
+ml/reports/*.log
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+
