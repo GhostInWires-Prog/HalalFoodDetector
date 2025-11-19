@@ -12,6 +12,10 @@ class Settings(BaseSettings):
     app_env: str = "development"
     cors_allow_origins: list[str] = ["*"]
     model_registry_path: Path = BASE_DIR / "src" / "models"
+    openrouter_api_key: str | None = None
+    openrouter_default_model: str = "deepseek/deepseek-chat-v3.1:free"
+    openrouter_referer: str | None = None
+    openrouter_title: str | None = None
 
     class Config:
         env_file = ".env"

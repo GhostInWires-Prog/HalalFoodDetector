@@ -1,24 +1,19 @@
-<<<<<<< HEAD
-# General
+# General OS Files
 .DS_Store
 Thumbs.db
+*.swp
+*.swo
+*~
 
-# Node / React Native
-app/node_modules/
-app/bun.lockb
-.expo/
-.expo-shared/
-app/android/.gradle/
-app/android/build/
-app/android/app/build/
-app/.env.local
+# Environment / Secrets
+.env
+.env.*
+*.local
 
-# Expo cache artifacts
-app/.expo/
-app/.expo-shared/
-app/ios/
-app/ios-build/
-app/.parcel-cache/
+# IDE settings
+.vscode/
+.idea/
+*.iml
 
 # Logs
 *.log
@@ -27,102 +22,12 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-# Metro / React Native cache
-app/.metro-cache/
-app/.packager/
-
-# Fastlane / builds
-app/fastlane/report.xml
-app/fastlane/Preview.html
-app/fastlane/screenshots/
-
-# Coverage / Jest
+# Coverage
 coverage/
-app/coverage/
+*.lcov
 
-# Backend Python
-backend/.venv/
-backend/__pycache__/
-backend/**/*.pyc
-backend/.mypy_cache/
-backend/.pytest_cache/
-backend/.ruff_cache/
-
-# Environment / secrets
-.env
-.env.*
-backend/.env
-app/.env
-
-# ML artifacts
-backend/src/models/*.h5
-backend/src/models/*.keras
-backend/src/models/*.tflite
-backend/src/models/*.joblib
-ml/experiments/
-ml/models/
-ml/reports/
-
-# IDE settings
-.vscode/
-.idea/
-*.swp
-
-# Node/Expo
-app/node_modules/
-app/.expo/
-app/.expo-shared/
-app/dist/
-
-# Python
-backend/.venv/
-__pycache__/
-*.pyc
-
-# ML Artifacts
-ml/datasets/
-ml/models/
-ml/experiments/run_*/
-ml/reports/*.log
-
-# OS Files
-.DS_Store
-Thumbs.db
-
-
-=======
-# Gradle files
-.gradle/
-build/
-
-# Local configuration file (sdk path, etc)
-local.properties
-
-# Log/OS Files
-*.log
-
-# Android Studio generated files and folders
-captures/
-.externalNativeBuild/
-.cxx/
-*.aab
-*.apk
-output-metadata.json
-
-# IntelliJ
-*.iml
-.idea/
-misc.xml
-deploymentTargetDropDown.xml
-render.experimental.xml
-
-# Keystore files
-*.jks
-*.keystore
-
-# Google Services (e.g. APIs or Firebase)
-google-services.json
-
-# Android Profiling
-*.hprof
->>>>>>> 3b62fbb3cdbfb9573d9765d2ec491e31f5b75719
+# Temporary files
+*.tmp
+*.temp
+com.facebook.react.devsupport.BundleDownloader
+java.lang.Thread

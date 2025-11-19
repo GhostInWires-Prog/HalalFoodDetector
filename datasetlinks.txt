@@ -1,0 +1,9 @@
+        "https://www.ecodehalalcheck.com/",
+        "https://international-halal.com/ecodes/",
+        "https://ecode.figlab.io/quick_list.html",
+
+"food_ingredients_halal_label": "irfanakbarihabibi/food-ingredients-dataset-with-halal-label",
+ROBOFLOW_CONFIG
+
+
+https://universe.roboflow.com/halallogo/halal-logo-dqkxm

@@ -1,10 +1,10 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { FlashList } from '@shopify/flash-list';
 
 import { ScreenContainer } from '../components/ScreenContainer';
 import { SectionHeader } from '../components/SectionHeader';
+import { SafeFlashList } from '../components/SafeFlashList';
 import { ScanHistoryRow } from '../components/ScanHistoryRow';
 import { StatusPill } from '../components/StatusPill';
 import { useHalalInsights } from '../hooks/useHalalInsights';
@@ -52,7 +52,7 @@ export function HistoryScreen() {
         ))}
       </View>
 
-      <FlashList
+      <SafeFlashList
         data={history}
         estimatedItemSize={120}
         keyExtractor={(item) => item.id}

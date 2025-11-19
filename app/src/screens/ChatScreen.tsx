@@ -1,15 +1,18 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { useCallback, useMemo, useState } from 'react';
 import { KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, View } from 'react-native';
-import { FlashList } from '@shopify/flash-list';
+import { isAxiosError } from 'axios';
+import { useMutation } from '@tanstack/react-query';
 import { Controller, useForm } from 'react-hook-form';
 
 import { ChatBubble } from '../components/ChatBubble';
 import { QuickActionButton } from '../components/QuickActionButton';
 import { ScreenContainer } from '../components/ScreenContainer';
 import { SectionHeader } from '../components/SectionHeader';
+import { SafeFlashList } from '../components/SafeFlashList';
 import { loog } from '../lib/loogin';
 import { halalGuidanceService } from '../services/halalGuidanceService';
+import { chatService } from '../services/chatService';
 import { colors } from '../theme/colors';
 
 type ChatMessage = {
@@ -22,6 +25,9 @@ type ChatMessage = {
 type ComposerValues = {
   message: string;
 };
+
+const SYSTEM_PROMPT =
+  'You are Noor, a halal compliance co-pilot. Provide actionable, concise guidance about halal certification, ingredients, and supply chain practices. Cite when unsure and encourage consulting accredited halal authorities when necessary.';
 
 export function ChatScreen() {
   const [messages, setMessages] = useState<ChatMessage[]>(() => halalGuidanceService.getChatSeed());
@@ -41,43 +47,159 @@ export function ChatScreen() {
     [],
   );
 
-  const appendAssistantResponse = useCallback((userMessage: string) => {
-    loog.debug('Simulating assistant reply', { userMessage });
-    setMessages((prev) => [
-      ...prev,
-      {
-        id: `user-${Date.now()}`,
-        author: 'user',
-        content: userMessage.trim(),
-        timestamp: 'Just now',
-      },
-      {
-        id: `assistant-${Date.now() + 1}`,
-        author: 'assistant',
-        content:
-          'Processing request with mock AI. Connect the real backend to receive verified halal compliance guidance.',
-        timestamp: 'Processing...',
-      },
-    ]);
-  }, []);
+  const { mutateAsync: requestCompletion, isPending } = useMutation({
+    mutationFn: chatService.createChatCompletion,
+  });
 
-  const onSubmit = useCallback(
-    (values: ComposerValues) => {
-      if (!values.message.trim()) {
+  const sendMessage = useCallback(
+    async (rawMessage: string) => {
+      const trimmedMessage = rawMessage.trim();
+
+      if (!trimmedMessage) {
+        loog.debug('Skipping empty chat submission');
         return;
       }
-      appendAssistantResponse(values.message);
+
+      if (isPending) {
+        loog.warn('Chat completion request already in flight');
+        return;
+      }
+
+      const timestampLabel = 'Just now';
+      const userMessage: ChatMessage = {
+        id: `user-${Date.now()}`,
+        author: 'user',
+        content: trimmedMessage,
+        timestamp: timestampLabel,
+      };
+
+      const placeholderId = `assistant-${Date.now() + 1}`;
+      const assistantPlaceholder: ChatMessage = {
+        id: placeholderId,
+        author: 'assistant',
+        content: 'Thinking through halal guidance...',
+        timestamp: 'Processing...',
+      };
+
+      setMessages((prev) => [...prev, userMessage, assistantPlaceholder]);
+
+      const serializedConversation = [
+        ...messages
+          .filter((message) => message.id.startsWith('user-') || message.id.startsWith('assistant-'))
+          .map((message) => ({
+            role: message.author,
+            content: message.content,
+          })),
+        {
+          role: 'user' as const,
+          content: trimmedMessage,
+        },
+      ];
+
+      try {
+        const response = await requestCompletion({
+          messages: [
+            {
+              role: 'system',
+              content: SYSTEM_PROMPT,
+            },
+            ...serializedConversation,
+          ],
+        });
+
+        const assistantContent = response.message.content.trim() || 'I do not have guidance to share yet.';
+
+        setMessages((prev) => {
+          let replaced = false;
+          const next = prev.map((message) => {
+            if (message.id === placeholderId) {
+              replaced = true;
+              return {
+                ...message,
+                content: assistantContent,
+                timestamp: timestampLabel,
+              };
+            }
+            return message;
+          });
+
+          if (!replaced) {
+            next.push({
+              id: placeholderId,
+              author: 'assistant',
+              content: assistantContent,
+              timestamp: timestampLabel,
+            });
+          }
+
+          return next;
+        });
+        loog.info('Assistant response received', { content: assistantContent });
+      } catch (error) {
+        const serverDetail =
+          isAxiosError(error) && error.response?.data && typeof error.response.data.detail === 'string'
+            ? error.response.data.detail
+            : undefined;
+        const fallbackMessage =
+          serverDetail ??
+          (isAxiosError(error) && typeof error.message === 'string'
+            ? error.message
+            : 'Sorry, I ran into an issue responding. Please try again shortly.');
+
+        loog.error('Chat completion failed', { error, serverDetail });
+        setMessages((prev) => {
+          let replaced = false;
+          const next = prev.map((message) => {
+            if (message.id === placeholderId) {
+              replaced = true;
+              return {
+                ...message,
+                content: fallbackMessage,
+                timestamp: timestampLabel,
+              };
+            }
+            return message;
+          });
+
+          if (!replaced) {
+            next.push({
+              id: placeholderId,
+              author: 'assistant',
+              content: fallbackMessage,
+              timestamp: timestampLabel,
+            });
+          }
+          return next;
+        });
+      }
+    },
+    [isPending, messages, requestCompletion],
+  );
+
+  const onSubmit = useCallback(
+    async (values: ComposerValues) => {
+      await sendMessage(values.message);
       reset();
     },
-    [appendAssistantResponse, reset],
+    [reset, sendMessage],
   );
 
   const handlePromptPress = useCallback(
     (prompt: string) => {
       loog.info('Prompt selected', { prompt });
-      appendAssistantResponse(prompt);
+      void sendMessage(prompt);
+      reset();
     },
-    [appendAssistantResponse],
+    [reset, sendMessage],
+  );
+
+  const renderMessageBubble = useCallback(
+    ({ item }: { item: ChatMessage }) => (
+      <View style={styles.messageSpacing}>
+        <ChatBubble author={item.author} content={item.content} timestamp={item.timestamp} />
+      </View>
+    ),
+    [],
   );
 
   return (
@@ -120,16 +242,13 @@ export function ChatScreen() {
         </View>
 
         <View style={styles.chatContainer}>
-          <FlashList
+          <SafeFlashList
             data={messages}
             estimatedItemSize={120}
             keyExtractor={(item) => item.id}
-            renderItem={({ item }) => (
-              <View style={styles.messageSpacing}>
-                <ChatBubble author={item.author} content={item.content} timestamp={item.timestamp} />
-              </View>
-            )}
+            renderItem={renderMessageBubble}
             contentContainerStyle={{ paddingBottom: 12 }}
+            extraData={messages}
           />
         </View>
 
